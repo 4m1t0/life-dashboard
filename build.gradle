@@ -8,7 +8,7 @@ plugins {
 	id 'java'
 }
 
-group = 'com.private'
+group = 'com.monitoring'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
 
@@ -90,7 +90,7 @@ spotbugs {
 	ignoreFailures = true
 	showProgress = true
 	effort = 'max'
-	onlyAnalyze = ['com.private.monitoring.life.*']
+	onlyAnalyze = ['com.monitoring.life.*']
 	maxHeapSize = '1g'
 	extraArgs = ['-nested:false']
 	jvmArgs = ['-Duser.language=ja']
