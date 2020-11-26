@@ -1,6 +1,10 @@
 plugins {
 	id 'org.springframework.boot' version '2.4.0'
 	id 'io.spring.dependency-management' version '1.0.10.RELEASE'
+	id 'com.github.spotbugs' version '4.6.0'
+	id 'com.srcclr.gradle' version '3.1.9'
+	id 'idea'
+	id 'jacoco'
 	id 'java'
 }
 
@@ -12,25 +16,139 @@ configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
+
+	e2eTestCompile.extendsFrom testImplementation
+	e2eTestRuntime.extendsFrom testRuntimeOnly
 }
 
 repositories {
 	mavenCentral()
 }
 
+ext {
+	set('springBootVersion', '2.4.0')
+	set('junitVersion', '5.+')
+}
+
 dependencies {
+	// spring
 	implementation 'org.springframework.boot:spring-boot-starter-batch'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	runtimeOnly 'com.h2database:h2'
-	runtimeOnly 'mysql:mysql-connector-java'
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.batch:spring-batch-test'
+
+	// selenium
+	implementation 'org.seleniumhq.selenium:selenium-java:3.141.+'
+
+	// mysql
+	runtimeOnly 'mysql:mysql-connector-java'
+
+	// lombok
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	// h2
+	testImplementation 'com.h2database:h2'
+
+	// Embedded MySQL
+	testImplementation 'com.wix:wix-embedded-mysql:4.+'
+
+	// DBUnit
+	testImplementation 'org.dbunit:dbunit:2.+'
+	testImplementation 'com.github.springtestdbunit:spring-test-dbunit:1.+'
+
+	// JUnit5
+	testImplementation 'org.junit.jupiter:junit-jupiter-api'
+	testImplementation 'org.junit.jupiter:junit-jupiter-params'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.+'
+	testRuntimeOnly 'org.junit.platform:junit-jupiter-engine'
+	testRuntimeOnly 'org.junit.platform:junit-vintage-engine'
+}
+
+sourceSets {
+	main {
+		java {
+			srcDir 'src/main/java'
+		}
+	}
+
+	e2eTest {
+		java {
+			srcDir 'src/e2eTest/java'
+			compileClasspath += main.output + test.output
+			runtimeClasspath += main.output + test.output
+		}
+		resources {
+			srcDir 'src/e2eTest/resources'
+		}
+	}
+}
+
+spotbugs {
+	ignoreFailures = true
+	showProgress = true
+	effort = 'max'
+	onlyAnalyze = ['com.private.monitoring.life.*']
+	maxHeapSize = '1g'
+	extraArgs = ['-nested:false']
+	jvmArgs = ['-Duser.language=ja']
+}
+
+spotbugsMain {
+	reports {
+		html {
+			enabled = true
+			destination = file("$buildDir/reports/spotbugs/main/spotbugs.html")
+			stylesheet = 'fancy-hist.xsl'
+		}
+	}
+}
+
+jacocoTestReport {
+	reports {
+		xml.enabled true
+		csv.enabled false
+		html.destination file("${buildDir}/jacocoHtml")
+	}
+	finalizedBy jacocoTestCoverageVerification
+}
+
+jacocoTestCoverageVerification {
+	violationRules {
+		rule {
+			limit {
+				minimum = 0.5
+			}
+		}
+	}
 }
 
 test {
 	useJUnitPlatform()
+	testLogging {
+		events 'failed'
+		exceptionFormat 'full'
+	}
+	systemProperties = [
+	        'junit.platform.output.capture.stdout': 'true',
+			'junit.platform.output.capture.stderr': 'true',
+	]
+	finalizedBy jacocoTestReport
+}
+
+task e2eTest(type:Test) {
+	useJUnitPlatform()
+	testLogging {
+		events 'failed'
+		exceptionFormat 'full'
+	}
+	systemProperties = [
+			'junit.platform.output.capture.stdout': 'true',
+			'junit.platform.output.capture.stderr': 'true',
+	]
+	classpath = sourceSets.e2eTest.runtimeClasspath
+	testClassesDirs = sourceSets.e2eTest.output.classesDirs
+	finalizedBy jacocoTestReport
 }
