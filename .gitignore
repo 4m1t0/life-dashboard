@@ -1,1 +1,7 @@
+HELP.md
 src/main/resources/application-credential.yaml
+.gradle
+build
+
+### InteliJ IDEA ###
+.idea
