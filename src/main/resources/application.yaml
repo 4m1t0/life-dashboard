@@ -1,0 +1,6 @@
+spring:
+  datasource:
+    driverClassName: com.mysql.cj.jdbc.Driver
+    sql-script-encoding: utf-8
+  jpa:
+    database: MYSQL
