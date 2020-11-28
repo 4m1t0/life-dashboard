@@ -20,7 +20,8 @@ public class MonthlyReportFlagEntity implements Comparable<MonthlyReportFlagEnti
   private Date month;
 
   private short jcb;
-  private short mufg;
+  private short mufg_normal;
+  private short mufg_deposit;
   private short report;
 
   @Override

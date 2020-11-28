@@ -1,5 +1,4 @@
 HELP.md
-src/main/resources/application-credential.yaml
 .gradle
 build
 
@@ -8,3 +7,4 @@ build
 
 ### Credential ###
 statements
+src/main/resources/application-credential.yaml

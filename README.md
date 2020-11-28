@@ -21,10 +21,20 @@ USE life_monitoring;
 
 4. テーブルを作成する．  
 ```sql
-CREATE TABLE monthly_report(
-  date timestamp,
-  type VARCHAR(15),
-  amount int
+CREATE TABLE IF NOT EXISTS monthly_report(
+  date DATE NOT NULL,
+  type VARCHAR(15) NOT NULL,
+  amount INT NOT NULL,
+  PRIMARY KEY (date, type)
+);
+
+CREATE TABLE IF NOT EXISTS monthly_report_flag(
+  month DATE NOT NULL,
+  jcb TINYINT NOT NULL,
+  mufg_normal TINYINT NOT NULL,
+  mufg_deposit TINYINT NOT NULL,
+  report TINYINT NOT NULL,
+  PRIMARY KEY (month)
 );
 ```
 
